@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maupassant WiFi - Accès Internet</title>
+    <meta name="description" content="Maupassant WiFi : demandez votre accès Internet Wi-Fi et choisissez votre forfait.">
+    <meta name="robots" content="index, follow">
+    <style>
+        :root {
+            --primary: #008751;
+            --bg: #f4f6f8;
+            --card-bg: #ffffff;
+            --text: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .notice-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-bottom: 20px;
+        }
+
+        .support-box {
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: .9em;
+            margin-bottom: 20px;
+        }
+
+        .support-box a {
+            color: #0056b3;
+            font-weight: bold;
+        }
+
+        .payment-info {
+            background-color: #e8f5e9;
+            border-left: 4px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .btn-copy-code {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            border: 0;
+            border-radius: 8px;
+            background: #007bff;
+            color: #fff;
+            font-size: .95em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 1em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .btn-submit:hover {
+            background-color: #006b40;
+        }
+
+        #preview {
+            max-width: 100%;
+            max-height: 150px;
+            margin-top: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .modal-backdrop { position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0, 0, 0, .55); }
+        .modal-backdrop.is-open { display: flex; }
+        .confirmation-modal { width: 100%; max-width: 420px; padding: 28px 24px 22px; border-radius: 14px; background: #fff; box-shadow: 0 12px 35px rgba(0, 0, 0, .25); text-align: center; }
+        .confirmation-modal h3 { margin: 0 0 14px; color: var(--primary); }
+        .wifi-credentials { margin: 18px 0; padding: 14px; border-radius: 8px; background: #e8f5e9; text-align: left; }
+        .modal-close { width: 100%; padding: 12px; border: 0; border-radius: 8px; background: var(--primary); color: #fff; font-size: 1em; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>MAUPASSANT WiFi Zone</h2>
+    <p class="subtitle">Connexion Haut Débit 3 Mbps</p>
+
+    <div class="notice-box">
+        <strong>Important :</strong> Connectez-vous d'abord à <strong>MAUPASSANT_WiFi_Zone</strong> et désactivez l'adresse MAC privée dans vos paramètres Wi-Fi.
+    </div>
+
+    <form id="wifiForm" action="https://formspree.io/f/xeaqvokl" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="fullName">Nom & Prénom :</label>
+            <input type="text" id="fullName" name="nom" placeholder="Ex: Jean Dossou" required>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Numéro WhatsApp :</label>
+            <input type="tel" id="phone" name="whatsapp_client" placeholder="Ex: 0150387418" required>
+        </div>
+
+        <div class="form-group">
+            <label for="deviceType">Type d'équipement :</label>
+            <select id="deviceType" name="type_appareil" onchange="updatePlans()" required>
+                <option value="single">Téléphone Seul (1 appareil)</option>
+                <option value="multi">Téléphone + PC (2 appareils)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="deviceModel">Modèle(s) exact(s) de l'appareil :</label>
+            <input type="text" id="deviceModel" name="modele_appareil" placeholder="Ex: Samsung A12 ou HP EliteBook + iPhone 11" required>
+        </div>
+
+        <div class="form-group">
+            <label for="plan">Choisissez un forfait :</label>
+            <select id="plan" name="forfait_fcfa" onchange="showPaymentInstructions()" required>
+                <!-- Mis à jour dynamiquement -->
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="paymentMethod">Moyen de paiement :</label>
+            <select id="paymentMethod" name="moyen_paiement" onchange="showPaymentInstructions()" required>
+                <option value="">-- Sélectionnez un moyen de paiement --</option>
+                <!-- <option value="Celtiis Cash">Celtiis Cash</option> -->
+                <option value="MTN Mobile Money">MTN MoMo</option>
+                <option value="Moov Money">Moov Money</option>
+            </select>
+        </div>
+
+        <!-- Zone d'instructions et bouton USSD -->
+        <div id="paymentInstructions" class="payment-info"></div>
+
+        <div class="form-group" id="transactionGroup" style="display:none;">
+            <label for="transactionReference">Référence de transaction / dépôt :</label>
+            <input type="text" id="transactionReference" name="reference_transaction" inputmode="numeric" pattern="[0-9]{1,15}" maxlength="15" placeholder="Saisissez la référence reçue par SMS" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 15)" required>
+            <small> Chiffres uniquement, 15 chiffres maximum.</small>
+        </div>
+
+        <button type="button" id="submitButton" class="btn-submit" onclick="submitRequest()">
+            Valider et recevoir mon accès
+        </button>
+    </form>
+
+    <div class="support-box">
+        <strong>Besoin d’aide ?</strong><br>
+        Si vous avez un problème de paiement ou toute autre difficulté, écrivez-nous sur
+        <a href="https://wa.me/2290191286784" target="_blank" rel="noopener noreferrer">WhatsApp : +229 01 91 28 67 84</a><br>
+        ou appelez-nous au <a href="tel:+2290150387418">+229 01 50 38 74 18</a>.
+    </div>
+</div>
+
+<div id="confirmationModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="confirmationTitle" aria-hidden="true">
+    <div class="confirmation-modal">
+        <h3 id="confirmationTitle">Merci pour votre achat !</h3>
+        <p>Votre référence de transaction a bien été reçue.</p>
+        <div class="wifi-credentials">
+            <strong>Connectez-vous au réseau Wi-Fi :</strong><br>
+            Réseau : <strong id="wifiNetwork"></strong><br>
+            Mot de passe : <strong id="wifiPassword"></strong>
+        </div>
+        <p> Apres etre connecté, patientez <strong>5 minutes</strong> pendant la validation de votre paiement et l’activation de votre accès.</p>
+        <button type="button" class="modal-close" onclick="closeConfirmation()">J’ai compris</button>
+    </div>
+</div>
+
+<script>
+    // Configuration des numéros de dépôt selon l'opérateur
+    const merchantNumbers = {
+        // "Celtiis Cash": "0140842749", // À réactiver quand la SIM Celtiis sera disponible
+        "MTN Mobile Money": "0150387418", // Remplacez par votre numéro MTN
+        "Moov Money": "0168848073"         // Remplacez par votre numéro Moov
+    };
+
+    // Remplacez ces valeurs par les identifiants réels de votre réseau Wi-Fi.
+    const wifiCredentials = {
+        network: "MAUPASSANT_WiFi_Zone",
+        password: "maupassant@"
+    };
+
+    const singlePlans = [
+        { text: "200 FCFA — 24 heures", amount: 200, label: "200 FCFA (24h - 1 appareil)" },
+        { text: "500 FCFA — 72 heures", amount: 500, label: "500 FCFA (72h - 1 appareil)" },
+        { text: "1000 FCFA — 1 semaine", amount: 1000, label: "1000 FCFA (1 sem - 1 appareil)" },
+        { text: "2500 FCFA — 1 mois", amount: 2500, label: "2500 FCFA (1 mois - 1 appareil)" }
+    ];
+
+    const multiPlans = [
+        { text: "300 FCFA — 24 heures", amount: 300, label: "300 FCFA (24h - Tél + PC)" },
+        { text: "800 FCFA — 72 heures", amount: 800, label: "800 FCFA (72h - Tél + PC)" },
+        { text: "1500 FCFA — 1 semaine", amount: 1500, label: "1500 FCFA (1 sem - Tél + PC)" },
+        { text: "3500 FCFA — 1 mois", amount: 3500, label: "3500 FCFA (1 mois - Tél + PC)" }
+    ];
+
+    function updatePlans() {
+        const type = document.getElementById('deviceType').value;
+        const planSelect = document.getElementById('plan');
+        planSelect.innerHTML = '';
+
+        const plans = type === 'single' ? singlePlans : multiPlans;
+        plans.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.amount;
+            opt.setAttribute('data-label', p.label);
+            opt.textContent = p.text;
+            planSelect.appendChild(opt);
+        });
+        showPaymentInstructions();
+    }
+
+    function showPaymentInstructions() {
+        const method = document.getElementById('paymentMethod').value;
+        const planSelect = document.getElementById('plan');
+        const amount = planSelect.value;
+        const box = document.getElementById('paymentInstructions');
+        const transactionGroup = document.getElementById('transactionGroup');
+
+        if (!method || !amount) {
+            box.style.display = 'none';
+            transactionGroup.style.display = 'none';
+            return;
+        }
+
+        const num = merchantNumbers[method] || "";
+        let instructions = "";
+        let ussdCode = "";
+
+        if (method === "MTN Mobile Money") {
+            ussdCode = `*880*1*1*${num}*${num}*${amount}#`;
+            instructions = `📲 <strong>Procédure MTN MoMo :</strong><br>
+            Numéro récepteur : <strong>${num}</strong><br>
+            Montant : <strong>${amount} FCFA</strong><br>
+            Composez ce code : <strong>${ussdCode}</strong>
+            <button type="button" class="btn-copy-code" onclick="copyUssdCode('${ussdCode}', this)">Copier le code</button>`;
+        } else if (method === "Moov Money") {
+            ussdCode = `*855*1*1*1*${num}*${num}*${amount}#`;
+            instructions = `📲 <strong>Procédure Moov Money :</strong><br>
+            Numéro récepteur : <strong>${num}</strong><br>
+            Montant : <strong>${amount} FCFA</strong><br>
+            Composez ce code : <strong>${ussdCode}</strong>
+            <button type="button" class="btn-copy-code" onclick="copyUssdCode('${ussdCode}', this)">Copier le code</button>`;
+        /* } else if (method === "Celtiis Cash") {
+            ussdCode = `*888*1*1*${num}*${amount}#`;
+            instructions = `📲 <strong>Procédure Celtiis Cash :</strong><br>
+            Numéro récepteur : <strong>${num}</strong><br>
+            Montant : <strong>${amount} FCFA</strong><br>
+            Composez ce code : <strong>${ussdCode}</strong>
+            <button type="button" class="btn-copy-code" onclick="copyUssdCode('${ussdCode}', this)">Copier le code</button>`; */
+        }
+
+        box.innerHTML = instructions;
+        box.style.display = 'block';
+        transactionGroup.style.display = 'block';
+    }
+
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('preview');
+                img.src = e.target.result;
+                img.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function copyUssdCode(code, button) {
+        navigator.clipboard.writeText(code).then(function() {
+            const originalText = button.textContent;
+            button.textContent = "Code copié !";
+            setTimeout(function() {
+                button.textContent = originalText;
+            }, 2000);
+        }).catch(function() {
+            alert("Impossible de copier automatiquement. Copiez ce code : " + code);
+        });
+    }
+
+    async function submitRequest() {
+        const name = document.getElementById('fullName').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const model = document.getElementById('deviceModel').value.trim();
+        const payment = document.getElementById('paymentMethod').value;
+        const reference = document.getElementById('transactionReference').value.trim();
+
+        if (!name || !phone || !model || !payment) {
+            alert("Veuillez remplir tous les champs du formulaire.");
+            return;
+        }
+
+        if (!/^\d{1,15}$/.test(reference)) {
+            alert("Veuillez saisir une référence de transaction contenant uniquement 1 à 15 chiffres.");
+            return;
+        }
+
+        const form = document.getElementById('wifiForm');
+        const submitButton = document.getElementById('submitButton');
+        submitButton.disabled = true;
+        submitButton.textContent = "Envoi en cours...";
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: new FormData(form),
+                headers: { "Accept": "application/json" }
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                const details = result.errors && result.errors.length
+                    ? result.errors.map(function(error) { return error.message; }).join(" ")
+                    : "Formspree a refusé l'envoi.";
+                throw new Error(details);
+            }
+            openConfirmation();
+        } catch (error) {
+            alert("Envoi impossible : " + error.message);
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = "Valider et recevoir mon accès";
+        }
+    }
+
+    function openConfirmation() {
+        document.getElementById('wifiNetwork').textContent = wifiCredentials.network;
+        document.getElementById('wifiPassword').textContent = wifiCredentials.password;
+        const modal = document.getElementById('confirmationModal');
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        modal.querySelector('.modal-close').focus();
+    }
+
+    function closeConfirmation() {
+        const modal = document.getElementById('confirmationModal');
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    document.getElementById('confirmationModal').addEventListener('click', function(event) {
+        if (event.target === this) closeConfirmation();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') closeConfirmation();
+    });
+
+    window.onload = function() {
+        updatePlans();
+    };
+</script>
+
+</body>
+</html>
